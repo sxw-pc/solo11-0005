@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}扫描进度 · 固漏巡检仪{% endblock %}
+{% block content %}
+<section class="page-head">
+  <p class="eyebrow">SCAN IN PROGRESS</p>
+  <h1>正在执行离线扫描</h1>
+  <p class="muted">任务 <code>{{ task.task_id }}</code> · 目标 <code>{{ task.options.target }}</code></p>
+</section>
+<section class="card progress-card" data-task-poll="{{ task.task_id }}">
+  <div class="progress-top">
+    <span id="phase-text" class="status status-running">{{ task.phase }}</span>
+    <strong id="progress-percent">{{ task.progress }}%</strong>
+  </div>
+  <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ task.progress }}">
+    <div id="progress-bar" class="progress-bar" style="width: {{ task.progress }}%"></div>
+  </div>
+  <div class="metric-grid">
+    <div class="metric"><span>已处理文件</span><b id="files-processed">{{ task.files_processed }}</b></div>
+    <div class="metric"><span>文件总数</span><b id="files-total">{{ task.files_total }}</b></div>
+    <div class="metric"><span>已命中漏洞</span><b id="findings-count">{{ task.findings_count }}</b></div>
+    <div class="metric"><span>任务状态</span><b id="task-status">扫描中</b></div>
+  </div>
+  <div class="current-path"><span>当前扫描路径</span><code id="current-file">{{ task.current_file or "正在准备扫描环境…" }}</code></div>
+  <p id="progress-error" class="form-error" role="alert"></p>
+  <noscript><p class="muted">当前浏览器禁用脚本，请手动刷新页面查看进度。</p></noscript>
+</section>
+<section class="card">
+  <h2>任务提示</h2>
+  <p class="muted">扫描在本地后台线程执行。页面每秒查询一次本地进度接口，不发送任何外部请求。完成后将自动跳转到结果页。</p>
+  <p class="muted small">如需离开页面，可稍后从首页“最近任务”中重新打开任务。</p>
+</section>
+{% endblock %}

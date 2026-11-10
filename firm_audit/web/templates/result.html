@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}扫描结果 · 固漏巡检仪{% endblock %}
+{% block content %}
+{% set scan = report.scan %}{% set summary = report.summary %}
+<section class="page-head result-head">
+  <div><p class="eyebrow">SCAN REPORT</p><h1>扫描结果</h1>
+    <p class="muted">任务 <code>{{ scan.task_id }}</code> · {{ scan.finished_at }} · 耗时 {{ scan.duration_seconds }} 秒</p></div>
+  <div class="report-actions">
+    {% for fmt in scan.options.formats %}<a class="btn btn-ghost" href="{{ url_for('main.download_report', task_id=scan.task_id, report_format=fmt) }}">{{ fmt|upper }} 报告</a>{% endfor %}
+  </div>
+</section>
+<section class="card">
+  <div class="card-head"><h2>风险概览</h2><span class="muted">证据与凭证均已脱敏展示</span></div>
+  <div class="summary-grid">
+    <div class="summary-tile total"><span>漏洞总数</span><b>{{ summary.total }}</b></div>
+    {% for item in summary.severity_order %}<div class="summary-tile {{ item.key }}"><span>{{ item.label }}</span><b>{{ item.count }}</b></div>{% endfor %}
+  </div>
+  <div class="meta-grid">
+    <div><span>目标路径</span><code>{{ scan.target }}</code></div>
+    <div><span>规则版本</span><b>{{ scan.rule_version }}</b>（{{ scan.rules_loaded }} 条）</div>
+    <div><span>扫描文件</span><b>{{ report.file_stats.files_scanned }}</b> / {{ report.file_stats.files_total }}</div>
+    <div><span>跳过文件</span><b>{{ report.file_stats.files_skipped }}</b></div>
+  </div>
+</section>
+<section class="card">
+  <div class="card-head"><h2>漏洞详情</h2><span class="muted">按风险等级从高到低展示</span></div>
+  {% for finding in report.findings %}
+  <article class="finding finding-{{ finding.severity }}">
+    <div class="finding-head">
+      <span class="sev sev-{{ finding.severity }}">{{ finding.severity_label }}</span>
+      <h3>{{ loop.index }}. {{ finding.title }}</h3>
+      <span class="muted small">{{ finding.rule_id }} · {{ finding.category_label }}</span>
+    </div>
+    <div class="finding-meta">
+      <div><span>文件</span><code>{{ finding.file }}</code></div>
+      <div><span>位置</span>{% if finding.evidence.line %}第 {{ finding.evidence.line }} 行 / 偏移 {{ finding.evidence.offset }}{% elif finding.evidence.offset %}二进制偏移 {{ finding.evidence.offset }} 字节{% else %}文件级证据{% endif %}</div>
+      {% if finding.metadata.access_method %}<div><span>访问方式</span>{{ finding.metadata.access_method }}</div>{% endif %}
+      {% if finding.metadata.potential_impact %}<div><span>潜在危害</span>{{ finding.metadata.potential_impact }}</div>{% endif %}
+      {% if finding.metadata.permission_exposure %}<div><span>权限暴露</span>{{ finding.metadata.permission_exposure|join('、') }}</div>{% endif %}
+    </div>
+    <details><summary>查看证据片段（敏感信息已打码）</summary><pre class="evidence">{{ finding.evidence.snippet }}</pre></details>
+    <details><summary>漏洞描述与修复建议</summary><p>{{ finding.description }}</p><p><strong>修复建议：</strong>{{ finding.remediation }}</p></details>
+  </article>
+  {% else %}<p class="empty-state">未发现命中项。仍建议结合人工审计复核固件配置。</p>{% endfor %}
+</section>
+{% if report.warnings %}
+<section class="card"><h2>告警信息</h2><ul class="warning-list">{% for warning in report.warnings %}<li>{{ warning }}</li>{% endfor %}</ul></section>
+{% endif %}
+<div class="back-row"><a class="link" href="{{ url_for('main.index') }}">← 返回任务首页</a></div>
+{% endblock %}

@@ -1,0 +1,11 @@
+version: "1.0.0"
+category: sensitive_file
+rules:
+  - {id: SENS-001, title: 系统账户敏感文件暴露, severity: high, scene: 系统账户目录, match_type: path, pattern: '**/shadow', paths: ['**/shadow', etc/shadow], tags: [account_file], description: 固件中保留 shadow 账户文件，密码哈希可被离线提取。, remediation: 清理发布固件中的账户文件，或在生产镜像中使用只读最小账户集。}
+  - {id: SENS-002, title: 私钥文件打包进固件, severity: high, scene: 密钥目录, match_type: path, pattern: '**/id_rsa', paths: ['**/id_rsa', '**/id_dsa', '**/id_ecdsa', '**/*.p12'], tags: [private_key_file], description: 发现 SSH 或 PKCS 私钥文件，提取后可用于身份冒用。, remediation: 从固件中移除私钥，改为首次启动生成设备唯一密钥。}
+  - {id: SENS-003, title: 数据库或备份文件暴露, severity: high, scene: Web 根目录与数据目录, match_type: path, pattern: '**/*.sql', paths: ['**/*.sql', '**/*.bak', '**/*.old', '**/*.dump'], tags: [backup_file], description: 发现数据库备份或旧版本文件，可能包含业务数据与凭证。, remediation: 发布前删除备份文件，Web 根目录禁止存放数据文件。}
+  - {id: SENS-004, title: 日志文件泄露, severity: medium, scene: 运行时目录, match_type: path, pattern: '**/*.log', paths: ['**/*.log', '**/messages', '**/syslog'], tags: [log_file], description: 固件中包含日志文件，可能泄露账号、路径与内部服务信息。, remediation: 清空发布日志并配置运行时日志轮转与权限限制。}
+  - {id: SENS-005, title: 证书文件暴露, severity: medium, scene: 证书目录, match_type: path, pattern: '**/*.crt', paths: ['**/*.crt', '**/*.cer'], tags: [certificate], description: 发现证书文件，需确认是否包含私钥信息或不安全的信任链。, remediation: 仅保留必要证书，确保证书与设备身份绑定并定期轮换。}
+  - {id: SENS-006, title: 本地数据库文件暴露, severity: medium, scene: 应用数据目录, match_type: path, pattern: '**/*.sqlite', paths: ['**/*.sqlite', '**/*.sqlite3', '**/*.db'], tags: [database_file], description: 发现 SQLite 等本地数据库，可能包含设备配置与用户数据。, remediation: 删除测试数据库；生产数据使用访问控制与加密存储。}
+  - {id: SENS-007, title: 命令行历史文件暴露, severity: low, scene: 用户主目录, match_type: path, pattern: '**/.bash_history', paths: ['**/.bash_history', '**/.ash_history', '**/.profile.bak'], tags: [history_file], description: 命令行历史可能泄露调试命令、内部地址与凭证操作记录。, remediation: 清理用户历史文件并在生产镜像中禁用持久化历史记录。}
+  - {id: SENS-008, title: 压缩包内敏感备份特征, severity: medium, scene: 数据目录, match_type: path, pattern: '**/*.tar', paths: ['**/*.tar', '**/*.tgz', '**/*.zip'], tags: [archive_file], description: 发现压缩归档，默认不解包；需人工确认是否包含敏感数据。, remediation: 从固件中移除归档文件，确需保留时加密并限制访问权限。}

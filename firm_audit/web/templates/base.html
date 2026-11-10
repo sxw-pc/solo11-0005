@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}固漏巡检仪{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+</head>
+<body>
+  <header class="topbar"><div class="container topbar-inner">
+    <a class="brand" href="{{ url_for('main.index') }}"><span class="brand-mark">FA</span><span>固漏巡检仪 <small>Firm Audit</small></span></a>
+    <span class="offline-pill">纯离线 · 本地环回</span>
+  </div></header>
+  <main class="container main">{% block content %}{% endblock %}</main>
+  <footer class="footer"><div class="container">
+    <p>{{ config.DISCLAIMER }}</p>
+    <p class="muted">固漏巡检仪 v{{ config.VERSION }} · 所有数据仅保存在本机 · 不发起外发网络请求</p>
+  </div></footer>
+  <script src="{{ url_for('static', filename='js/common.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

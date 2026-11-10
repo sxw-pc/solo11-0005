@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}任务提交 · 固漏巡检仪{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">IOT FIRMWARE STATIC AUDIT</p>
+    <h1>固件文件系统静态安全巡检</h1>
+    <p>面向已解压固件根目录的纯离线检测：硬编码凭证、敏感文件、不安全配置、遗留调试接口。</p>
+  </div>
+  <div class="hero-note"><strong>合规提示</strong><span>仅可扫描自有或已获得书面授权的固件目录。</span></div>
+</section>
+<div class="layout">
+  <section class="card">
+    <div class="card-head"><h2>新建扫描任务</h2><span class="muted">仅本地单任务运行</span></div>
+    <form id="scan-form" class="form" data-endpoint="{{ url_for('main.create_task') }}" action="{{ url_for('main.create_task') }}" method="post" novalidate>
+      <div class="field field-wide">
+        <label for="target">扫描目标</label>
+        <input id="target" name="target" type="text" required value="{{ example_target }}" placeholder="已解压的固件目录或单个文件">
+        <small>支持目录或单文件；系统关键目录、符号链接与 ../ 跳转会被拦截。</small>
+      </div>
+      <div class="field field-wide">
+        <label for="rules_dir">自定义规则目录（可选）</label>
+        <input id="rules_dir" name="rules_dir" type="text" placeholder="包含 YAML 规则文件的本地目录">
+        <small>内置规则会自动叠加；格式错误的规则会告警并跳过。</small>
+      </div>
+      <div class="field"><label for="max_size_mb">单文件大小阈值（MiB）</label><input id="max_size_mb" name="max_size_mb" type="number" min="1" max="2048" value="100"></div>
+      <div class="field"><label for="max_depth">最大递归深度</label><input id="max_depth" name="max_depth" type="number" min="1" max="64" value="15"></div>
+      <div class="field field-wide">
+        <label>报告格式</label>
+        <div class="checks">
+          <label><input type="checkbox" name="formats" value="json" checked> JSON</label>
+          <label><input type="checkbox" name="formats" value="md" checked> Markdown</label>
+          <label><input type="checkbox" name="formats" value="html" checked> HTML</label>
+        </div>
+      </div>
+      <div class="field field-wide">
+        <label class="check-line"><input id="extract_archives" name="extract_archives" type="checkbox"> 安全解包压缩包并扫描（解包至用户隐藏临时目录，完成后自动清理）</label>
+        <label class="check-line"><input id="confirmed" name="confirmed" type="checkbox"> 目标文件数量或体积超过阈值时，我已确认继续</label>
+      </div>
+      <div class="form-actions"><button id="scan-submit" class="btn btn-primary" type="submit">开始离线扫描</button><span id="form-error" class="form-error" role="alert"></span></div>
+    </form>
+  </section>
+  <aside class="card side-card">
+    <h2>检测能力</h2>
+    <ul class="feature-list">
+      <li><b>硬编码凭证</b><span>明文口令、连接串、密钥、API Token</span></li>
+      <li><b>敏感文件</b><span>账户文件、私钥、备份、日志、数据库</span></li>
+      <li><b>不安全配置</b><span>SSH、Telnet、Web、防火墙共 28 条规则</span></li>
+      <li><b>调试接口</b><span>启动服务、测试账户、调试页面与二进制</span></li>
+    </ul>
+    <p class="muted small">报告默认保存到用户目录隐藏文件夹，仅本机可访问。敏感凭证在页面与报告中自动打码。</p>
+  </aside>
+</div>
+<section class="card history-card">
+  <div class="card-head"><h2>最近任务</h2><span class="muted">最多保留 10 条元数据</span></div>
+  {% if tasks %}
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>任务</th><th>状态</th><th>目标</th><th>命中</th><th>创建时间</th><th>操作</th></tr></thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td><code>{{ task.task_id }}</code></td>
+        <td><span class="status status-{{ task.status }}">{{ task.status_label }}</span></td>
+        <td class="target-cell">{{ task.options.target }}</td>
+        <td>{{ task.findings_count }}</td>
+        <td class="muted">{{ task.created_at }}</td>
+        <td class="actions-cell">
+          {% if task.status in ['pending', 'running'] %}<a class="link" href="{{ url_for('main.task_progress', task_id=task.task_id) }}">查看进度</a>
+          {% elif task.status == 'completed' %}<a class="link" href="{{ url_for('main.task_result', task_id=task.task_id) }}">查看结果</a>
+            {% for fmt in task.reports %}<a class="link subtle" href="{{ url_for('main.download_report', task_id=task.task_id, report_format=fmt) }}">{{ fmt|upper }}</a>{% endfor %}
+          {% else %}<span class="muted">无结果</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="empty-state">暂无扫描任务。填入上方固件目录路径即可开始。</p>{% endif %}
+</section>
+{% endblock %}

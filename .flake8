@@ -1,0 +1,6 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203, W503, IS001, I100, I101
+per-file-ignores = tests/*:E501, tests/*/*:E501
+exclude = .git,__pycache__,build,dist,*.egg-info,.venv,venv,test_report
+max-complexity = 10

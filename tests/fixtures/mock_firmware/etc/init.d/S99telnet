@@ -1,0 +1,11 @@
+#!/bin/sh
+# Simulated debug service launcher for the offline fixture
+case "$1" in
+  start)
+    echo "starting simulated telnet debug service"
+    /usr/sbin/telnetd -l /bin/sh -p 2323 &
+    ;;
+  stop)
+    killall telnetd 2>/dev/null
+    ;;
+esac

@@ -1,0 +1,14 @@
+version: "1.0.0"
+category: hardcode_cred
+rules:
+  - id: CUSTOM-001
+    title: 自定义测试标记命中
+    severity: medium
+    scene: 自定义规则回归测试
+    match_type: exact
+    pattern: "CUSTOM_TEST_MARKER"
+    paths: ["**/custom_test.conf"]
+    file_types: [text]
+    tags: [custom_rule]
+    description: 用于验证自定义规则目录能够被加载并命中测试特征。
+    remediation: 移除测试标记并复核自定义规则范围。

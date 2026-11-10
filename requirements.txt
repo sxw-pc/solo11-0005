@@ -1,0 +1,15 @@
+# 固漏巡检仪 1.0.0 离线依赖锁定
+# 安装前请将所有 wheel 文件放入本地目录，再执行：
+#   python -m pip install --no-index --find-links ./offline_wheels -r requirements.txt
+Flask==2.3.3
+Werkzeug==2.3.8
+Jinja2==3.1.4
+MarkupSafe==2.1.5
+itsdangerous==2.1.2
+click==8.1.7
+blinker==1.6.3
+PyYAML==6.0.2
+python-magic==0.4.27
+pefile==2023.2.7
+pytest==7.4.4
+pytest-cov==4.1.0

@@ -1,0 +1,12 @@
+# Simulated SSH configuration for offline fixture only
+Port 22
+PermitRootLogin yes
+PermitEmptyPasswords no
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+UsePAM yes
+X11Forwarding no
+AllowTcpForwarding no
+StrictModes yes
+MaxAuthTries 3
+PermitUserEnvironment no
